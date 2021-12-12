@@ -1,7 +1,5 @@
 from config import load_config
 
 
-def start_scan():
+def start_scan(movies, tv):
     cfg = load_config()
-    has_movies = cfg.getboolean('DEFAULT', 'enable_movies')
-    has_tv = cfg.getboolean('DEFAULT', 'enable_tvshows')

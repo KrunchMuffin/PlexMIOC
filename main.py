@@ -1,5 +1,4 @@
 import logging
-from configparser import ConfigParser
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
@@ -12,7 +11,7 @@ logger = logging.getLogger('plexmoic')
 logger.setLevel(logging.DEBUG)
 # create file handler which logs debug messages
 rfh = RotatingFileHandler(
-    "/logs/plexmoic.log", mode="w", maxBytes=100000, backupCount=5
+    "logs/plexmoic.log", mode="w", maxBytes=100000, backupCount=5
 )
 rfh.setLevel(logging.DEBUG)
 # create console handler with a higher log level
@@ -28,23 +27,22 @@ logger.addHandler(ch)
 
 
 def check_config() -> bool:
-    logger.debug("Starting check config")
+    logger.info("Starting check config")
     ok = Path("config/config.ini").exists()
     if ok:
         logger.debug("Config file exists.")
         cfg = load_config()
-        has_default = cfg.has_section('DEFAULT')
+        has_default = cfg.has_section('MAIN')
         has_plex = cfg.has_section('PLEX')
         has_options = cfg.has_section('OPTIONS')
         has_logos = cfg.has_section('LOGOS')
         if not has_default or not has_plex or not has_options or not has_logos:
-            logger.debug(f"DEFAULT ${has_default} | PLEX ${has_plex} | OPTIONS ${has_options} | LOGOS ${has_logos}")
+            logger.debug(f"MAIN ${has_default} | PLEX ${has_plex} | OPTIONS ${has_options} | LOGOS ${has_logos}")
             logger.info(
-                "There is config file issue. One or more of the following sections are missing: DEFAULT, PLEX, "
+                "There is config file issue. One or more of the following sections are missing: MAIN, PLEX, "
                 "OPTIONS, LOGOS")
             ok = False
     else:
-        logger.debug("Config file does not exist.")
         logger.info(
             "Config file does not exist. Creating config. Please open config/config.ini and adjust accordingly.")
         ok = config.create_config()
@@ -52,13 +50,20 @@ def check_config() -> bool:
 
 
 if __name__ == '__main__':
+    logger.debug("##################### STARTING NEW SESSION ##############################")
+    logger.info("Starting up...")
     if check_config():
         cfg = load_config()
-        if cfg.getboolean('DEFAULT', 'enabled'):
-            scan.start_scan()
+        if cfg.getboolean('MAIN', 'enabled'):
+            logger.debug("Script enabled")
+            has_movies = cfg.getboolean('MAIN', 'enable_movies')
+            if has_movies:
+                logger.info("Movies enabled")
+            has_tv = cfg.getboolean('MAIN', 'enable_tvshows')
+            if has_tv:
+                logger.info("TV Shows enabled")
+            scan.start_scan(has_movies, has_tv)
         else:
             logger.info("Script is not enabled. Exiting...")
-            logger.debug("Script not enabled")
     else:
         logger.info("There is no config file located at config/config.ini and I was not able to create one. Exiting...")
-        logger.debug("Could not create config file. See previous errors.")

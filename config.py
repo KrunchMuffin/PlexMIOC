@@ -14,10 +14,11 @@ def load_config() -> ConfigParser:
 
 def create_config() -> bool:
     conf: ConfigParser = ConfigParser()
-    # conf.add_section('DEFAULT')
-    conf.set('DEFAULT', 'enabled', '0')
-    conf.set('DEFAULT', 'movies_enabled', '0')
-    conf.set('DEFAULT', 'tvshows_enabled', '0')
+    conf.add_section('MAIN')
+    conf.set('MAIN', 'enabled', '0')
+    conf.set('MAIN', 'movies_enabled', '0')
+    conf.set('MAIN', 'tvshows_enabled', '0')
+    conf.set('MAIN', 'debug', '0')
     conf.add_section('PLEX')
     conf.set('PLEX', 'movies_path', '')
     conf.set('PLEX', 'tvshows_path', '')
