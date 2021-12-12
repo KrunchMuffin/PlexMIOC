@@ -1,7 +1,9 @@
 import logging
+from configparser import ConfigParser
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
+import config
 import scan
 from config import load_config
 
@@ -25,9 +27,28 @@ logger.addHandler(rfh)
 logger.addHandler(ch)
 
 
-def check_config():
+def check_config() -> bool:
     logger.debug("Starting check config")
-    return Path("config/config.ini").exists()
+    ok = Path("config/config.ini").exists()
+    if ok:
+        logger.debug("Config file exists.")
+        cfg = load_config()
+        has_default = cfg.has_section('DEFAULT')
+        has_plex = cfg.has_section('PLEX')
+        has_options = cfg.has_section('OPTIONS')
+        has_logos = cfg.has_section('LOGOS')
+        if not has_default or not has_plex or not has_options or not has_logos:
+            logger.debug(f"DEFAULT ${has_default} | PLEX ${has_plex} | OPTIONS ${has_options} | LOGOS ${has_logos}")
+            logger.info(
+                "There is config file issue. One or more of the following sections are missing: DEFAULT, PLEX, "
+                "OPTIONS, LOGOS")
+            ok = False
+    else:
+        logger.debug("Config file does not exist.")
+        logger.info(
+            "Config file does not exist. Creating config. Please open config/config.ini and adjust accordingly.")
+        ok = config.create_config()
+    return ok
 
 
 if __name__ == '__main__':
@@ -36,6 +57,8 @@ if __name__ == '__main__':
         if cfg.getboolean('DEFAULT', 'enabled'):
             scan.start_scan()
         else:
-            print("Script is not enabled. Exiting...")
+            logger.info("Script is not enabled. Exiting...")
+            logger.debug("Script not enabled")
     else:
-        print("There is no config file located at config/config.ini. Exiting...")
+        logger.info("There is no config file located at config/config.ini and I was not able to create one. Exiting...")
+        logger.debug("Could not create config file. See previous errors.")
