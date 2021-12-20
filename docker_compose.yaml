@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+  plex-utills:
+    image: dbinott/plex-mioc
+    container_name: plex-mioc
+    restart: unless-stopped
+    volumes:
+      - <your Plex movies directory>:/movies
+      - <your Plex TV shows directory>:/tv
+      - <your config location>:/config
+      - <your logs location>:/logs

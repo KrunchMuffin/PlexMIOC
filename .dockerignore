@@ -1,0 +1,11 @@
+.idea
+poetry*
+*.toml
+.git
+.gitignore
+Dockerfile*
+.devcontainer
+README.md
+LICENSE
+config.ini
+*.log
